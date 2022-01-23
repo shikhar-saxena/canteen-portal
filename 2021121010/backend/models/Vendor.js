@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const emailValidator = require("email-validator"); // To check if email is valid or not
+const { ItemSchema } = require("../models/Item");
 
-// Create Schema
 const VendorSchema = new Schema({
   managerName: {
     type: String,
@@ -17,19 +16,11 @@ const VendorSchema = new Schema({
     type: String,
     unique: true,
     required: true,
-    validate: {
-      validator: function (v) {
-        return emailValidator.validate(v);
-      },
-      message: (props) => `${props.value} is not a valid email address!`,
-    },
   },
-  contactNo: {
-    //TODO: validate number
+  contact: {
     type: Number,
     required: true,
   },
-  // closeTime >= openTime VALIDATE TODO:
   openTime: {
     type: Date,
     required: true,
@@ -38,6 +29,11 @@ const VendorSchema = new Schema({
     type: Date,
     required: true,
   },
+  password: {
+    type: String,
+    required: true,
+  },
+  items: [ItemSchema],
 });
 
 module.exports = Vendor = mongoose.model("Vendor", VendorSchema);

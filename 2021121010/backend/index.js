@@ -1,40 +1,50 @@
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
 require("dotenv").config();
 
-
 const PORT = process.env.PORT || 4000;
-// const DB_NAME = "tutorial"
+const DB_NAME = process.env.DB_NAME;
 
 const app = express();
 
 // routes
-// var testAPIRouter = require("./routes/testAPI");
-// var UserRouter = require("./routes/Users");
+const registerRouter = require("./routes/register");
+const loginRouter = require("./routes/login");
+const vendorRouter = require("./routes/vendor");
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Connection to MongoDB
-// mongoose.connect('mongodb://127.0.0.1:27017/' + DB_NAME, { useNewUrlParser: true });
-// const connection = mongoose.connection;
-// connection.once('open', function() {
-//     console.log("MongoDB database connection established successfully !");
-// })
+// 27017 TODO:
+mongoose.connect("mongodb://127.0.0.1:2700/" + DB_NAME, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+const connection = mongoose.connection;
+connection.once("open", () => {
+  console.log("MongoDB database connection established successfully !");
+});
 
 // setup API endpoints
+app.use("/register", registerRouter);
+app.use("/login", loginRouter);
+app.use("/vendor", vendorRouter);
+
+// app.use("/register", registerRouter);
+// app.use("/register", registerRouter);
+
 // app.use("/testAPI", testAPIRouter);
 // app.use("/user", UserRouter);
 
 // A get function
 app.get("/", (req, res) => {
-    res.send("hello its me");
-})
+  res.redirect("/register");
+});
 
 app.listen(PORT, () => {
-    console.log("Server is running on Port: " + PORT);
+  console.log("Server is running on Port: " + PORT);
 });
