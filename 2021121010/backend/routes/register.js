@@ -3,23 +3,18 @@ const validator = require("validator");
 const Vendor = require("../models/Vendor");
 const Buyer = require("../models/Buyer");
 const bcrypt = require("bcryptjs");
+const checkEmpty = require("../lib/checkEmpty");
 
-function checkEmpty(val) {
-  if (!val || validator.isEmpty(val)) return true;
-  else return false;
+function hashPassword(password) {
+  const salt = bcrypt.genSaltSync(10);
+  return bcrypt.hashSync(password, salt);
 }
 
-async function hashPassword(password) {
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  return { salt, hashedPassword };
-}
-
-function registerNewBuyer(req, res, next) {
+async function registerNewBuyer(req, res) {
   const name = req.body.name;
   const email = req.body.email;
   const contact = req.body.contact;
-  const age = req.body.age;
+  let age = req.body.age;
   const batchName = req.body.batchName;
   const password = req.body.password;
   const repassword = req.body.repassword;
@@ -33,53 +28,61 @@ function registerNewBuyer(req, res, next) {
     checkEmpty(password) ||
     checkEmpty(repassword)
   )
-    res.status(400).json({
+    return res.status(400).json({
       error: "All Fields required",
     });
 
   if (password !== repassword)
-    res.status(400).json({
+    return res.status(400).json({
       error: "Password and Confirm Password do not match",
     });
 
   if (!validator.isEmail(email))
-    res.status(400).json({
+    return res.status(400).json({
       error: "Invalid Email",
     });
 
+  // TODO: Verify age and batchName
+  // try {
+  //   age = parseInt(age);
+  //   // if (age < 0) throw new Error("Invalid Age");
+  // } catch (error) {
+  //   return res.status(400).json({ error: "Invalid Age" });
+  // }
+
+  const phoneNo = /^\d{10}$/;
+  if (!contact.match(phoneNo))
+    /* Invalid Contact No */
+    return res.status(400).json({
+      error: "Invalid Contact Number",
+    });
+
   // Check if email is unique
-  Vendor.findOne({ email }).then(function (vendor) {
-    if (vendor)
-      /* email not unique */
-      res.status(400).json({
-        error: "Email already exists",
-      });
-  });
-
-  // const phoneno = /^\d{10}$/;
-  // if(contact.match)
-
-  // if(contact)
-  // TODO: contact validation age validation and batchName validation
+  let buyer = await Buyer.findOne({ email });
+  if (buyer)
+    /* email not unique */
+    return res.status(400).json({
+      error: "Email already exists",
+    });
 
   const newBuyer = new Buyer({
     name,
-    age,
+    age, //TODO:
     email,
-    contact,
+    contact: Number(contact),
     batchName,
-    /* password auth TODO: */
+    password: hashPassword(password),
   });
 
-  newBuyer
-    .save()
-    .then((buyer) => res.status(200).json(buyer))
-    .catch((err) => res.status(400).json({ error: err }));
-
-  next();
+  try {
+    buyer = await newBuyer.save();
+    return res.status(200).json(buyer);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
 }
 
-function registerNewVendor(req, res, next) {
+async function registerNewVendor(req, res) {
   const managerName = req.body.managerName;
   const shopName = req.body.shopName;
   const email = req.body.email;
@@ -99,79 +102,87 @@ function registerNewVendor(req, res, next) {
     checkEmpty(password) ||
     checkEmpty(repassword)
   )
-    res.status(400).json({
+    return res.status(400).json({
       error: "All Fields required",
     });
 
   if (password !== repassword)
-    res.status(400).json({
+    return res.status(400).json({
       error: "Password and Confirm Password do not match",
     });
 
   if (!validator.isEmail(email))
-    res.status(400).json({
+    return res.status(400).json({
       error: "Invalid Email",
     });
 
+  const phoneNo = /^\d{10}$/;
+  if (!contact.match(phoneNo))
+    /* Invalid Contact No */
+    return res.status(400).json({
+      error: "Invalid Contact Number",
+    });
+
+  if (openTime === closeTime)
+    return res.status(400).json({
+      error: "Opening and Closing Time cannot be same",
+    });
+
   // Check if shopName and email are unique
-  Vendor.findOne({ email }).then(function (vendor) {
-    if (vendor)
-      /* email not unique */
-      res.status(400).json({
-        error: "Email already exists",
-      });
-  });
+  let vendor = await Vendor.findOne({ email });
+  if (vendor)
+    /* email not unique */
+    return res.status(400).json({
+      error: "Email already exists",
+    });
 
-  Vendor.findOne({ shopName }).then(function (vendor) {
-    if (vendor)
-      /* shopName not unique */
-      res.status(400).json({
-        error: "Shop Name already exists",
-      });
-  });
-
-  // TODO: contact validation openTime < closeTime
+  vendor = await Vendor.findOne({ shopName });
+  if (vendor)
+    /* shopName not unique */
+    return res.status(400).json({
+      error: "Shop Name already exists",
+    });
 
   const newVendor = new Vendor({
     managerName,
     shopName,
     email,
-    contact,
+    contact: Number(contact),
     openTime,
     closeTime,
-    /* password auth TODO: */
+    password: hashPassword(password),
   });
 
-  newVendor
-    .save()
-    .then((vendor) => res.status(200).json(vendor))
-    .catch((err) => res.status(400).json({ error: err }));
+  console.log(newVendor);
 
-  next();
+  try {
+    vendor = await newVendor.save();
+    return res.status(200).json(vendor);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
 }
 
 // Common register middleware
-function registerUser(req, res, next) {
+function registerUser(req, res) {
   const choice = req.body.choice;
 
   if (checkEmpty(choice))
-    res.status(400).json({
+    return res.status(400).json({
       error: "User Type required",
     });
 
-  if (choice === "Vendor") registerNewVendor(req, res, next);
+  if (choice === "Vendor") return registerNewVendor(req, res);
 
-  if (choice === "Buyer") registerNewBuyer(req, res, next);
-
-  next();
+  if (choice === "Buyer") return registerNewBuyer(req, res);
 }
 
-/**
- * @get request
- */
-router.get("/", (req, res) => {
-  res.send("<p> You found me</p>");
-});
+// /**
+//  * @get request
+//  */
+// router.get("/", (req, res) => {
+//   res.send("<p> You found me</p>");
+// });
 
 /**
  * @post Register new user
