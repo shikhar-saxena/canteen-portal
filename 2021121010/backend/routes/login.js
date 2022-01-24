@@ -38,17 +38,14 @@ router.post("/", async (req, res) => {
     });
 
   /* Put userType in the user object */
-  user = { ...user, choice: choice };
+  user = { _id: user._id, choice: choice };
+
+  console.log(user);
 
   // JWT auth
-  jwt.sign(
-    { user: user },
-    process.env.SECRET_KEY,
-    { expiresIn: "12h" },
-    (err, token) => {
-      return res.json({ token });
-    }
-  );
+  jwt.sign({ user: user }, process.env.SECRET_KEY, (err, token) => {
+    return res.json({ token });
+  });
 });
 
 module.exports = router;

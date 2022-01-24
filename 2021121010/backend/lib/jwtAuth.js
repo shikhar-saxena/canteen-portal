@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 
 // Verification middleware (for protected routes)
 function authenticateToken(req, res, next) {
-  // Get auth header value
   const bearerHeader = req.headers["authorization"];
 
   // Check if bearer is undefined

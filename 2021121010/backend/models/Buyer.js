@@ -35,3 +35,13 @@ const BuyerSchema = new Schema({
 });
 
 module.exports = Buyer = mongoose.model("Buyer", BuyerSchema);
+
+/* Orders
+Buyer id
+vendor id
+item id
+quantity
+status
+cost = price * quantity
+rating (by buyer)
+*/

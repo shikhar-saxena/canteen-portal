@@ -2,13 +2,8 @@ const router = require("express").Router();
 const validator = require("validator");
 const Vendor = require("../models/Vendor");
 const Buyer = require("../models/Buyer");
-const bcrypt = require("bcryptjs");
 const checkEmpty = require("../lib/checkEmpty");
-
-function hashPassword(password) {
-  const salt = bcrypt.genSaltSync(10);
-  return bcrypt.hashSync(password, salt);
-}
+const hashPassword = require("../lib/hashPassword");
 
 async function registerNewBuyer(req, res) {
   const name = req.body.name;
@@ -21,9 +16,7 @@ async function registerNewBuyer(req, res) {
 
   if (
     checkEmpty(name) ||
-    checkEmpty(age) ||
     checkEmpty(email) ||
-    checkEmpty(contact) ||
     checkEmpty(batchName) ||
     checkEmpty(password) ||
     checkEmpty(repassword)
@@ -42,16 +35,13 @@ async function registerNewBuyer(req, res) {
       error: "Invalid Email",
     });
 
-  // TODO: Verify age and batchName
-  // try {
-  //   age = parseInt(age);
-  //   // if (age < 0) throw new Error("Invalid Age");
-  // } catch (error) {
-  //   return res.status(400).json({ error: "Invalid Age" });
-  // }
+  if (!(age > 0 && age < 120))
+    return res.status(400).json({
+      error: "Invalid Age",
+    });
 
   const phoneNo = /^\d{10}$/;
-  if (!contact.match(phoneNo))
+  if (!("" + contact).match(phoneNo))
     /* Invalid Contact No */
     return res.status(400).json({
       error: "Invalid Contact Number",
@@ -67,9 +57,9 @@ async function registerNewBuyer(req, res) {
 
   const newBuyer = new Buyer({
     name,
-    age, //TODO:
+    age,
     email,
-    contact: Number(contact),
+    contact,
     batchName,
     password: hashPassword(password),
   });
@@ -96,7 +86,7 @@ async function registerNewVendor(req, res) {
     checkEmpty(managerName) ||
     checkEmpty(shopName) ||
     checkEmpty(email) ||
-    checkEmpty(contact) ||
+    // checkEmpty(contact) ||
     checkEmpty(openTime) ||
     checkEmpty(closeTime) ||
     checkEmpty(password) ||
@@ -117,7 +107,7 @@ async function registerNewVendor(req, res) {
     });
 
   const phoneNo = /^\d{10}$/;
-  if (!contact.match(phoneNo))
+  if (!("" + contact).match(phoneNo))
     /* Invalid Contact No */
     return res.status(400).json({
       error: "Invalid Contact Number",
@@ -147,7 +137,7 @@ async function registerNewVendor(req, res) {
     managerName,
     shopName,
     email,
-    contact: Number(contact),
+    contact,
     openTime,
     closeTime,
     password: hashPassword(password),

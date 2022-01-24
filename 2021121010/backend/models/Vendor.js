@@ -33,7 +33,7 @@ const VendorSchema = new Schema({
     type: String,
     required: true,
   },
-  items: [ItemSchema],
+  // items: [ItemSchema],
 });
 
 module.exports = Vendor = mongoose.model("Vendor", VendorSchema);

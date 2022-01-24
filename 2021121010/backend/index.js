@@ -13,6 +13,7 @@ const app = express();
 const registerRouter = require("./routes/register");
 const loginRouter = require("./routes/login");
 const vendorRouter = require("./routes/vendor");
+const buyerRouter = require("./routes/buyer");
 
 app.use(cors());
 app.use(express.json());
@@ -33,6 +34,7 @@ connection.once("open", () => {
 app.use("/register", registerRouter);
 app.use("/login", loginRouter);
 app.use("/vendor", vendorRouter);
+app.use("/buyer", buyerRouter);
 
 // app.use("/register", registerRouter);
 // app.use("/register", registerRouter);

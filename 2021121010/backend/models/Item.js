@@ -15,6 +15,11 @@ const AddonSchema = new Schema({
 const Addon = mongoose.model("Addon", AddonSchema);
 
 const ItemSchema = new Schema({
+  email: {
+    // Vendor email
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,
@@ -25,9 +30,9 @@ const ItemSchema = new Schema({
   },
   rating: {
     type: Number,
-    enum: [0, 1, 2, 3, 4, 5],
     default: 0,
-    required: true, //!!!
+    sum: 0, // Sum of ratings
+    count: 0, // Count of buyer rating this item
   },
   foodType: {
     type: String,
@@ -35,7 +40,7 @@ const ItemSchema = new Schema({
     required: true,
   },
   addons: [AddonSchema],
-  tag: [String],
+  tags: [String],
 });
 
 const Item = mongoose.model("Item", ItemSchema);
