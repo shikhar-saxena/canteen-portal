@@ -20,8 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Connection to MongoDB
-// 27017 TODO:
-mongoose.connect("mongodb://127.0.0.1:2700/" + DB_NAME, {
+mongoose.connect("mongodb://127.0.0.1:27017/" + DB_NAME, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

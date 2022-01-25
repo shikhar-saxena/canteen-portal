@@ -33,10 +33,10 @@ router.get("/profile", authenticateToken, checkBuyer, async (req, res) => {
  */
 
 // TODO: Search bar ?
-// router.get("/", authenticateToken, checkBuyer, async (req, res) => {
-//   const items = await Item.find();
-//   if (items) return res.status(200).json(items);
-// });
+router.get("/", authenticateToken, checkBuyer, async (req, res) => {
+  const items = await Item.find();
+  if (items) return res.status(200).json(items);
+});
 
 // TODO: favourite section
 
