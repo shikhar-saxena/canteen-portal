@@ -19,23 +19,26 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import { useNavigate } from "react-router-dom";
 
-const UsersList = (props) => {
+const BuyerDashboard = (props) => {
   const [users, setUsers] = useState([]);
+  const [items, setItems] = useState([]);
   const [sortedUsers, setSortedUsers] = useState([]);
   const [sortName, setSortName] = useState(true);
   const [searchText, setSearchText] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/user")
+      .get("/buyer", {
+        headers: { authorization: localStorage.getItem("authorization") },
+      })
       .then((response) => {
-        setUsers(response.data);
-        setSortedUsers(response.data);
-        setSearchText("");
+        setItems(response.data);
       })
       .catch((error) => {
-        console.log(error);
+        navigate("/login");
       });
   }, []);
 
@@ -60,6 +63,11 @@ const UsersList = (props) => {
 
   return (
     <div>
+      <div>
+        {items.map((item) => (
+          <p>{item.name}</p>
+        ))}
+      </div>
       <Grid container>
         <Grid item xs={12} md={3} lg={3}>
           <List component="nav" aria-label="mailbox folders">
@@ -165,4 +173,4 @@ const UsersList = (props) => {
   );
 };
 
-export default UsersList;
+export default BuyerDashboard;

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const { ItemSchema } = require("../models/Item");
 
 const VendorSchema = new Schema({
   managerName: {
@@ -33,7 +32,6 @@ const VendorSchema = new Schema({
     type: String,
     required: true,
   },
-  // items: [ItemSchema],
 });
 
 module.exports = Vendor = mongoose.model("Vendor", VendorSchema);

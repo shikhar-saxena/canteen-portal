@@ -56,7 +56,6 @@ router.post("/", authenticateToken, checkVendor, async (req, res) => {
   let vendor = await Vendor.findById(req.user.user._id);
   if (!vendor) return res.sendStatus(500);
 
-  const email = vendor.email;
   const name = req.body.name;
   const price = req.body.price;
   const foodType = req.body.foodType;
@@ -89,7 +88,7 @@ router.post("/", authenticateToken, checkVendor, async (req, res) => {
   // TODO: check tags (not empty) in frontend
 
   const newItem = new Item({
-    email,
+    vendor: vendor._id,
     name,
     price,
     foodType,
@@ -109,7 +108,7 @@ router.post("/", authenticateToken, checkVendor, async (req, res) => {
 router.put("/:name", authenticateToken, checkVendor, async (req, res) => {
   let vendor = await Vendor.findById(req.user.user._id);
   if (!vendor) return res.sendStatus(500);
-  const email = vendor.email;
+  // const email = vendor.email;
   const name = req.body.name;
   const price = req.body.price;
   const foodType = req.body.foodType;
@@ -137,7 +136,7 @@ router.put("/:name", authenticateToken, checkVendor, async (req, res) => {
   // TODO: check tags (not empty) in frontend
 
   const newItem = new Item({
-    email,
+    // email,
     name,
     price,
     foodType,
@@ -158,20 +157,22 @@ router.delete("/:name", authenticateToken, checkVendor, async (req, res) => {
   let vendor = await Vendor.findById(req.user.user._id);
   if (!vendor) return res.sendStatus(500);
 
-  try {
-    await Item.deleteOne({ email: vendor.email, name: req.params.name });
-    return res.sendStatus(200);
-  } catch (error) {
-    return res.status(500).json({ error });
-  }
+  Item.deleteOne({ name: req.params.name, vendor: vendor._id }).exec(
+    (err, item) => {
+      if (!err) return res.sendStatus(200);
+      else return res.status(500).json({ error });
+    }
+  );
 });
 
 // Display all food items of this vendor
 router.get("/", authenticateToken, checkVendor, async (req, res) => {
   const vendor = await Vendor.findById(req.user.user._id);
   if (vendor) {
-    const items = await Item.find({ email: vendor.email });
-    return res.status(200).json(items);
+    const items = Item.find({ vendor: vendor._id }).exec((err, items) => {
+      if (err) return res.status(500).json(err);
+      else return res.status(200).json(items);
+    });
   }
 });
 

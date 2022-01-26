@@ -33,10 +33,10 @@ const VendorDashboard = (props) => {
         headers: { authorization: localStorage.getItem("authorization") },
       })
       .then((response) => {
-        setItems(response.data.items);
+        setItems(response.data);
       })
       .catch((error) => {
-        navigate("/");
+        navigate("/login");
       });
   }, []);
 
