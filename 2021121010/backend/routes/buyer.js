@@ -3,6 +3,7 @@ const { Addon, Item } = require("../models/Item");
 const authenticateToken = require("../lib/jwtAuth");
 const checkEmpty = require("../lib/checkEmpty");
 const Buyer = require("../models/Buyer");
+const Order = require("../models/Order");
 
 /**
  * Authentication wrapper middleware (for Buyer)
@@ -36,12 +37,47 @@ router.get("/profile", authenticateToken, checkBuyer, async (req, res) => {
 router.get("/", authenticateToken, checkBuyer, (req, res) => {
   Item.find()
     .populate("vendor")
-    .exec((err, items) => {
-      if (err) return res.status(500).json(err);
+    .exec((error, items) => {
+      if (error) return res.status(500).json({ error });
       else return res.status(200).json(items);
     });
 });
 
 // TODO: favourite section
+
+// Place Order
+router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
+  const buyer = await Buyer.findById(req.user.user._id);
+  if (!buyer) return res.sendStatus(500);
+
+  const placedTime = req.body.placedTime;
+  const quantity = req.body.quantity;
+  const cost = req.body.cost; //TODO: compute cost in frontend
+
+  try {
+    parseInt(quantity);
+  } catch (err) {
+    return res.status(400).json({ error: "Invalid Quantity" });
+  }
+
+  const newOrder = new Order({
+    placedTime,
+    item: req.params.itemId,
+    buyer: buyer._id,
+    quantity,
+    cost,
+  });
+
+  try {
+    let order = await newOrder.save();
+    return res.status(200).json(order);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+});
+
+/**
+ * My Orders
+ */
 
 module.exports = router;

@@ -35,6 +35,7 @@ const OrderSchema = new Schema({
       "READY FOR PICKUP",
       "COMPLETED",
     ],
+    default: "PLACED",
     required: true,
   },
   rating: {
@@ -42,6 +43,7 @@ const OrderSchema = new Schema({
     default: 0,
     min: 0,
     max: 5,
+    required: true,
   },
 });
 
