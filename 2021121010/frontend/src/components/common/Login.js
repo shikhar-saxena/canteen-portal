@@ -80,6 +80,7 @@ const Login = () => {
           <Select
             value={choice}
             labelId="user-type"
+            label="User Type"
             onChange={onChangeChoice}
             autoWidth
           >

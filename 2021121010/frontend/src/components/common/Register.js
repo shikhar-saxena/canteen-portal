@@ -111,9 +111,9 @@ const Register = () => {
           <InputLabel id="user-type">User Type</InputLabel>
           <Select
             value={choice}
+            label="User Type"
             labelId="user-type"
             onChange={onChangeChoice}
-            autoWidth
           >
             <MenuItem value={"Vendor"}>Vendor</MenuItem>
             <MenuItem value={"Buyer"}>Buyer</MenuItem>
@@ -151,6 +151,7 @@ const Register = () => {
                   <Select
                     value={batchName}
                     labelId="batch-name"
+                    label="Batch Name"
                     onChange={(e) => setBatchName(e.target.value)}
                     autoWidth
                   >
