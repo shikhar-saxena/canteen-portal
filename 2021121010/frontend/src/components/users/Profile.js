@@ -1,7 +1,7 @@
 import axios from "../templates/axiosConfig";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, Grid, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 
 const Profile = ({ choice }) => {
   const navigate = useNavigate();
@@ -32,14 +32,7 @@ const Profile = ({ choice }) => {
         let key = entry[0];
         let value = entry[1];
 
-        if (
-          !(
-            key === "_id" ||
-            key === "password" ||
-            key === "__v" ||
-            key === "wallet"
-          )
-        )
+        if (!(key === "_id" || key === "password" || key === "__v"))
           return (
             <Grid item key={key} xs={12} padding={3}>
               <Typography
