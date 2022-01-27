@@ -143,7 +143,7 @@ async function registerNewVendor(req, res) {
     password: hashPassword(password),
   });
 
-  console.log(newVendor);
+  // console.log(newVendor);
 
   try {
     vendor = await newVendor.save();

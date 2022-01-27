@@ -4,6 +4,7 @@ const { Addon, Item } = require("../models/Item");
 const Order = require("../models/Order");
 const authenticateToken = require("../lib/jwtAuth");
 const checkEmpty = require("../lib/checkEmpty");
+const { getOrders, checkOrderLimit, orderCount } = require("../lib/vendor");
 
 /**
  * Authentication wrapper middleware (for Vendor)
@@ -181,20 +182,6 @@ router.get("/", authenticateToken, checkVendor, async (req, res) => {
  * Orders page
  */
 
-// Returns orders for a particular vendor
-async function getOrders(vendor) {
-  const items = await Item.find({ vendor: vendor._id });
-
-  let orders = [];
-
-  for (let i = 0; i < items.length; i++) {
-    if (items[i])
-      orders = [...orders, await Order.find({ item: items[i]._id })];
-  }
-
-  return orders;
-}
-
 // Show all orders for this vendor
 router.get("/orders", authenticateToken, checkVendor, async (req, res) => {
   const vendor = await Vendor.findById(req.user.user._id);
@@ -202,18 +189,6 @@ router.get("/orders", authenticateToken, checkVendor, async (req, res) => {
 
   res.status(200).json(await getOrders(vendor));
 });
-
-async function checkOrderLimit(vendor) {
-  let orders = await getOrders(vendor);
-
-  let count = 0;
-  for (let i = 0; i < orders.length; i++) {
-    if (orders[i].status === "ACCEPTED" || orders[i].status === "COOKING")
-      count++;
-  }
-
-  return count;
-}
 
 // Move to the next stage
 router.put(
@@ -260,5 +235,17 @@ router.put(
     else return res.sendStatus(500);
   }
 );
+
+/**
+ * Statistics Page
+ */
+router.get("/statistics", authenticateToken, checkVendor, async (req, res) => {
+  const vendor = await Vendor.findById(req.user.user._id);
+  if (!vendor) return res.sendStatus(500);
+  let count = await orderCount(vendor);
+
+  return res.status(200).json(count);
+  // TOP 5 items TODO:
+});
 
 module.exports = router;
