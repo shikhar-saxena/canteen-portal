@@ -226,7 +226,8 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
                         Price
                       </TableCell>
                       {(() => {
-                        if (choice === "buyer") return <TableCell />;
+                        if (choice === "buyer" && available)
+                          return <TableCell />;
                       })()}
                     </TableRow>
                   </TableHead>
@@ -237,7 +238,7 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
                           <TableCell>{addon.name}</TableCell>
                           <TableCell>{addon.price}</TableCell>
                           {(() => {
-                            if (choice === "buyer")
+                            if (choice === "buyer" && available)
                               return (
                                 <TableCell>
                                   <Checkbox
