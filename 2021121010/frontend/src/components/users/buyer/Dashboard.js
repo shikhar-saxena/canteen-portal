@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "../../templates/axiosConfig";
-import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import List from "@mui/material/List";
@@ -17,10 +11,9 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 
 import SearchIcon from "@mui/icons-material/Search";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useNavigate } from "react-router-dom";
 import FoodItems from "../../templates/FoodItems";
+import { Stack, Typography } from "@mui/material";
 
 const BuyerDashboard = (props) => {
   const [users, setUsers] = useState([]);
@@ -29,6 +22,22 @@ const BuyerDashboard = (props) => {
   const [sortName, setSortName] = useState(true);
   const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
+  const [wallet, setWallet] = useState(0);
+
+  const [addedAmount, setAddedAmount] = useState(0);
+
+  useEffect(() => {
+    axios
+      .get("/buyer/profile", {
+        headers: { authorization: localStorage.getItem("authorization") },
+      })
+      .then((response) => {
+        setWallet(response.data.wallet);
+      })
+      .catch((error) => {
+        navigate("/login");
+      });
+  }, []);
 
   useEffect(() => {
     axios
@@ -60,6 +69,27 @@ const BuyerDashboard = (props) => {
   const customFunction = (event) => {
     console.log(event.target.value);
     setSearchText(event.target.value);
+  };
+
+  const addMoney = (event) => {
+    event.preventDefault();
+
+    axios
+      .put(
+        `/buyer`,
+        { addedAmount },
+        {
+          headers: { authorization: localStorage.getItem("authorization") },
+        }
+      )
+      .then((response) => {
+        setWallet(response.data.wallet);
+      })
+      .catch((error) => {
+        // console.log(error);
+      });
+
+    setAddedAmount(0);
   };
 
   return (
@@ -131,6 +161,46 @@ const BuyerDashboard = (props) => {
                   />
                 )}
               />
+            </ListItem>
+            <ListItem>
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <Stack direction="row" spacing={1}>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      component="div"
+                      color="primary"
+                    >
+                      Wallet
+                    </Typography>
+                    <Typography variant="h6" gutterBottom component="div">
+                      {wallet}
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                      <TextField
+                        label="Add Money"
+                        // variant="contained"
+                        type="number"
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        size="small"
+                        style={{ minWidth: "6rem" }}
+                        value={addedAmount === 0 ? "" : addedAmount}
+                        onChange={(event) => setAddedAmount(event.target.value)}
+                      />
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={addMoney}
+                      >
+                        Add
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Grid>
+              </Grid>
             </ListItem>
           </List>
         </Grid>

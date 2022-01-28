@@ -55,6 +55,24 @@ function FoodItem({ item, choice, items, setItems }) {
     }
   }, [item, choice]);
 
+  function deleteItem(name) {
+    axios
+      .delete(`/vendor/${name}`, {
+        headers: {
+          authorization: localStorage.getItem("authorization"),
+        },
+      })
+      .then((response) => {
+        // setItems(response.data);
+        console.log("Success");
+        let newItems = items.filter((it) => it.name !== name);
+        setItems(newItems);
+      })
+      .catch((error) => {
+        // navigate("/login");
+      });
+  }
+
   return (
     <TableContainer
       component={Paper}
@@ -229,23 +247,6 @@ function FoodItem({ item, choice, items, setItems }) {
                     </>
                   );
               } else {
-                function deleteItem(name) {
-                  axios
-                    .delete(`/vendor/${name}`, {
-                      headers: {
-                        authorization: localStorage.getItem("authorization"),
-                      },
-                    })
-                    .then((response) => {
-                      // setItems(response.data);
-                      console.log("Success");
-                      let newItems = items.filter((it) => it.name !== name);
-                      setItems(newItems);
-                    })
-                    .catch((error) => {
-                      // navigate("/login");
-                    });
-                }
                 return (
                   <TableCell align="center">
                     <Button
@@ -284,7 +285,7 @@ export default function FoodItems({ choice }) {
       .catch((error) => {
         navigate("/login");
       });
-  }, []);
+  }, [items, choice]);
 
   return (
     <Grid container>

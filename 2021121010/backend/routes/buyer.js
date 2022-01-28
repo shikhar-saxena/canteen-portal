@@ -43,6 +43,36 @@ router.get("/", authenticateToken, checkBuyer, (req, res) => {
     });
 });
 
+// Add wallet money
+router.put("/", authenticateToken, checkBuyer, async (req, res) => {
+  let buyer = await Buyer.findById(req.user.user._id);
+  if (!buyer) return res.sendStatus(500);
+
+  let addedAmount = req.body.addedAmount;
+
+  if (!addedAmount)
+    return res.status(400).json({
+      error: "Please add amount",
+    });
+
+  try {
+    addedAmount = parseInt("" + addedAmount);
+
+    if (addedAmount < 0) throw new Error();
+  } catch (error) {
+    return res.status(400).json({ error: "Invalid Added Amount" });
+  }
+
+  buyer = await Buyer.findOneAndUpdate(
+    { _id: buyer._id },
+    { wallet: buyer.wallet + addedAmount },
+    { new: true }
+  );
+
+  if (buyer) return res.status(200).json(buyer);
+  else return res.sendStatus(500);
+});
+
 // TODO: favourite section
 
 // Place Order
