@@ -21,6 +21,13 @@ const OrderSchema = new Schema({
     type: Number,
     required: true,
   },
+  addons: [
+    {
+      addonName: String,
+      addonPrice: Number,
+      check: Boolean,
+    },
+  ],
   cost: {
     type: Number,
     required: true,
@@ -48,12 +55,3 @@ const OrderSchema = new Schema({
 });
 
 module.exports = Order = mongoose.model("Order", OrderSchema);
-// const current = new Date();
-
-// const time = current.toLocaleTimeString("en-US", {
-//   hour: "2-digit",
-//   minute: "2-digit",
-// });
-
-// console.log(time); // "5:25 AM"
-// getHours and getMinutes

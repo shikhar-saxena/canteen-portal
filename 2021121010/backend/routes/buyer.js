@@ -27,13 +27,9 @@ router.get("/profile", authenticateToken, checkBuyer, async (req, res) => {
   if (buyer) return res.status(200).json(buyer);
 });
 
-//TODO: Edit profile
-
 /**
  * Dashboard
  */
-
-// TODO: Search bar ?
 router.get("/", authenticateToken, checkBuyer, (req, res) => {
   Item.find()
     .populate("vendor")
@@ -80,15 +76,37 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
   const buyer = await Buyer.findById(req.user.user._id);
   if (!buyer) return res.sendStatus(500);
 
+  let cost = req.body.itemPrice;
   const placedTime = req.body.placedTime;
   const quantity = req.body.quantity;
-  const cost = req.body.cost; //TODO: compute cost in frontend
+  const checked = req.body.checked;
+  let wallet = req.body.wallet;
 
   try {
     parseInt(quantity);
+    if (quantity <= 0) throw new Error();
   } catch (err) {
     return res.status(400).json({ error: "Invalid Quantity" });
   }
+
+  let addons = [];
+
+  checked.forEach((addon) => {
+    console.log(addon);
+    if (addon.check) {
+      cost += addon.addonPrice;
+      addons = [...addons, addon];
+    }
+  });
+
+  if (cost > wallet)
+    return res
+      .status(400)
+      .json({ error: "Insufficient Money to buy the item" });
+
+  wallet = wallet - cost;
+
+  console.log(JSON.stringify(addons));
 
   const newOrder = new Order({
     placedTime,
@@ -96,11 +114,13 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
     buyer: buyer._id,
     quantity,
     cost,
+    addons,
   });
 
   try {
     let order = await newOrder.save();
-    return res.status(200).json(order);
+    await Buyer.findOneAndUpdate({ _id: buyer._id }, { wallet: wallet });
+    return res.sendStatus(200);
   } catch (error) {
     return res.status(500).json({ error });
   }

@@ -16,11 +16,7 @@ import FoodItems from "../../templates/FoodItems";
 import { Stack, Typography } from "@mui/material";
 
 const BuyerDashboard = (props) => {
-  const [users, setUsers] = useState([]);
   const [items, setItems] = useState([]);
-  const [sortedUsers, setSortedUsers] = useState([]);
-  const [sortName, setSortName] = useState(true);
-  const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
   const [wallet, setWallet] = useState(0);
 
@@ -35,9 +31,10 @@ const BuyerDashboard = (props) => {
         setWallet(response.data.wallet);
       })
       .catch((error) => {
-        navigate("/login");
+        // navigate("/login");
+        console.log(error);
       });
-  }, []);
+  }, [wallet]);
 
   useEffect(() => {
     axios
@@ -51,25 +48,6 @@ const BuyerDashboard = (props) => {
         navigate("/login");
       });
   }, []);
-
-  const sortChange = () => {
-    let usersTemp = users;
-    const flag = sortName;
-    usersTemp.sort((a, b) => {
-      if (a.date != undefined && b.date != undefined) {
-        return (1 - flag * 2) * (new Date(a.date) - new Date(b.date));
-      } else {
-        return 1;
-      }
-    });
-    setUsers(usersTemp);
-    setSortName(!sortName);
-  };
-
-  const customFunction = (event) => {
-    console.log(event.target.value);
-    setSearchText(event.target.value);
-  };
 
   const addMoney = (event) => {
     event.preventDefault();
@@ -96,72 +74,7 @@ const BuyerDashboard = (props) => {
     <div>
       <Grid container>
         <Grid item xs={12} md={3} lg={3}>
-          <List component="nav" aria-label="mailbox folders">
-            <ListItem text>
-              <h1>Filters</h1>
-            </ListItem>
-          </List>
-        </Grid>
-        <Grid item xs={12} md={9} lg={9}>
-          <List component="nav" aria-label="mailbox folders">
-            <TextField
-              id="standard-basic"
-              label="Search"
-              fullWidth={true}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment>
-                    <IconButton>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              onChange={customFunction}
-            />
-          </List>
-        </Grid>
-      </Grid>
-      <Grid container>
-        <Grid item xs={12} md={3} lg={3}>
-          <List component="nav" aria-label="mailbox folders">
-            <ListItem>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  Salary
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    id="standard-basic"
-                    label="Enter Min"
-                    fullWidth={true}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    id="standard-basic"
-                    label="Enter Max"
-                    fullWidth={true}
-                  />
-                </Grid>
-              </Grid>
-            </ListItem>
-            <Divider />
-            <ListItem divider>
-              <Autocomplete
-                id="combo-box-demo"
-                options={users}
-                getOptionLabel={(option) => option.name}
-                fullWidth
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Select Names"
-                    variant="outlined"
-                  />
-                )}
-              />
-            </ListItem>
+          <List component="nav">
             <ListItem>
               <Grid container spacing={2}>
                 <Grid item xs={4}>
@@ -204,7 +117,7 @@ const BuyerDashboard = (props) => {
             </ListItem>
           </List>
         </Grid>
-        <FoodItems choice={"buyer"} />
+        <FoodItems choice={"buyer"} wallet={wallet} setWallet={setWallet} />
       </Grid>
     </div>
   );

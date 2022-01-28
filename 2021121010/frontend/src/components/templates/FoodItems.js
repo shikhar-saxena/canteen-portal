@@ -11,12 +11,29 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import { useNavigate } from "react-router-dom";
 import axios from "./axiosConfig";
-import { Stack, Button, Grid, FormControl } from "@mui/material";
+import { Stack, Button, Grid, TextField, Checkbox } from "@mui/material";
 import Tag from "./Tag";
 
-function FoodItem({ item, choice, items, setItems }) {
+function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
+  let arr = [];
+  for (let i = 0; i < item.addons.length; i++) {
+    arr[i] = {
+      addonName: item.addons[i].name,
+      addonPrice: item.addons[i].price,
+      check: false,
+    };
+  }
+
   const [available, setAvailable] = useState(false);
   const [quantity, setQuantity] = useState(0);
+  const [checked, setChecked] = useState(arr);
+
+  // For addon checkboxes
+  const handleChange = (event, index) => {
+    const updatedChange = [...checked];
+    updatedChange[index].check = event.target.checked;
+    setChecked(updatedChange);
+  };
 
   useEffect(() => {
     if (choice === "buyer") {
@@ -64,13 +81,39 @@ function FoodItem({ item, choice, items, setItems }) {
       })
       .then((response) => {
         // setItems(response.data);
-        console.log("Success");
+        // console.log("Success");
         let newItems = items.filter((it) => it.name !== name);
         setItems(newItems);
       })
       .catch((error) => {
         // navigate("/login");
       });
+  }
+
+  function addOrder(event, item, checked, quantity, wallet) {
+    event.preventDefault();
+
+    console.log(checked);
+
+    const currentDate = new Date();
+    const placedTime = currentDate.getHours() + ":" + currentDate.getMinutes();
+
+    axios
+      .post(
+        `/buyer/${item._id}`,
+        { itemPrice: item.price, placedTime, quantity, checked, wallet },
+        {
+          headers: { authorization: localStorage.getItem("authorization") },
+        }
+      )
+      .then((response) => {
+        setWallet(response.data.wallet);
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+      });
+
+    setQuantity(0);
   }
 
   return (
@@ -188,17 +231,27 @@ function FoodItem({ item, choice, items, setItems }) {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {item.addons.map((addon) => (
-                      <TableRow>
-                        <TableCell>{addon.name}</TableCell>
-                        <TableCell>{addon.price}</TableCell>
-                        {(() => {
-                          if (choice === "buyer")
-                            /* TODO: */
-                            return <TableCell>select</TableCell>;
-                        })()}
-                      </TableRow>
-                    ))}
+                    {item.addons.map((addon, index) => {
+                      return (
+                        <TableRow>
+                          <TableCell>{addon.name}</TableCell>
+                          <TableCell>{addon.price}</TableCell>
+                          {(() => {
+                            if (choice === "buyer")
+                              return (
+                                <TableCell>
+                                  <Checkbox
+                                    checked={checked[index].check}
+                                    onChange={(e) =>
+                                      handleChange(e, index, addon._id)
+                                    }
+                                  />
+                                </TableCell>
+                              );
+                          })()}
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </Box>
@@ -216,20 +269,37 @@ function FoodItem({ item, choice, items, setItems }) {
           </TableRow>
           <TableRow>
             <TableCell />
-
             {(() => {
               if (choice === "buyer") {
                 if (available)
                   return (
-                    //TODO: Quantity
-                    <TableCell align="center">
-                      <Button
-                        variant="outlined"
-                        style={{ marginInline: "auto" }}
-                      >
-                        Buy
-                      </Button>
-                    </TableCell>
+                    <>
+                      <TableCell>
+                        <TextField
+                          label="Quantity"
+                          // variant="contained"
+                          type="number"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          size="small"
+                          style={{ maxWidth: "6rem" }}
+                          value={quantity === 0 ? "" : quantity}
+                          onChange={(event) => setQuantity(event.target.value)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outlined"
+                          style={{ marginInline: "auto" }}
+                          onClick={(event) =>
+                            addOrder(event, item, checked, quantity, wallet)
+                          }
+                        >
+                          Buy
+                        </Button>
+                      </TableCell>
+                    </>
                   );
                 else
                   return (
@@ -248,16 +318,18 @@ function FoodItem({ item, choice, items, setItems }) {
                   );
               } else {
                 return (
-                  <TableCell align="center">
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      style={{ marginInline: "auto" }}
-                      onClick={(event) => deleteItem(item.name)}
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
+                  <>
+                    <TableCell align="center">
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        style={{ marginInline: "auto" }}
+                        onClick={(event) => deleteItem(item.name)}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </>
                 );
               }
             })()}
@@ -268,7 +340,7 @@ function FoodItem({ item, choice, items, setItems }) {
   );
 }
 
-export default function FoodItems({ choice }) {
+export default function FoodItems({ choice, wallet, setWallet }) {
   const [items, setItems] = useState([]);
 
   const navigate = useNavigate();
@@ -296,10 +368,10 @@ export default function FoodItems({ choice }) {
           choice={choice}
           items={items}
           setItems={setItems}
+          wallet={wallet}
+          setWallet={setWallet}
         />
       ))}
     </Grid>
   );
 }
-
-// contact: 1234567890
