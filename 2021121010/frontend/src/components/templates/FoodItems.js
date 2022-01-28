@@ -1,0 +1,304 @@
+import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import Box from "@mui/material/Box";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import { useNavigate } from "react-router-dom";
+import axios from "./axiosConfig";
+import { Stack, Button, Grid, FormControl } from "@mui/material";
+import Tag from "./Tag";
+
+function FoodItem({ item, choice, items, setItems }) {
+  const [available, setAvailable] = useState(false);
+  const [quantity, setQuantity] = useState(0);
+
+  useEffect(() => {
+    if (choice === "buyer") {
+      const current = new Date();
+
+      // Finds and returns Date object for given time 'HH:MM'
+      let setDateTime = function (date, time) {
+        let sp = time.split(":");
+        date.setHours(sp[0]);
+        date.setMinutes(sp[1]);
+        return date;
+      };
+
+      let currentTime = current.getTime(),
+        openTime = setDateTime(
+          new Date(current),
+          item.vendor.openTime
+        ).getTime(),
+        closeTime = setDateTime(
+          new Date(current),
+          item.vendor.closeTime
+        ).getTime();
+
+      if (
+        openTime < closeTime &&
+        currentTime > openTime &&
+        currentTime < closeTime
+      )
+        setAvailable(true);
+      else if (
+        openTime > closeTime &&
+        !(currentTime < openTime && currentTime > closeTime)
+      )
+        setAvailable(true);
+      else setAvailable(false);
+    }
+  }, [item, choice]);
+
+  return (
+    <TableContainer
+      component={Paper}
+      elevation={6}
+      xs={12}
+      md={3}
+      lg={3}
+      sx={{ width: "auto", margin: "1rem" }}
+    >
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell
+              style={{
+                fontWeight: 700,
+                textTransform: "uppercase",
+                color: "#4527a0",
+              }}
+            >
+              Item Name
+            </TableCell>
+            <TableCell
+              style={{
+                fontWeight: 700,
+                textTransform: "uppercase",
+                color: "#4527a0",
+              }}
+            >
+              Item Price
+            </TableCell>
+            <TableCell
+              style={{
+                fontWeight: 700,
+                textTransform: "uppercase",
+                color: "#4527a0",
+              }}
+            >
+              Food Type
+            </TableCell>
+            {(() => {
+              if (choice === "buyer")
+                return (
+                  <>
+                    <TableCell
+                      style={{
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        color: "#4527a0",
+                      }}
+                    >
+                      Shop
+                    </TableCell>
+
+                    <TableCell
+                      style={{
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        color: "#4527a0",
+                      }}
+                    >
+                      Contact
+                    </TableCell>
+                  </>
+                );
+            })()}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell>{item.name}</TableCell>
+            <TableCell>{item.price}</TableCell>
+            <TableCell>{item.foodType}</TableCell>
+            {(() => {
+              if (choice === "buyer")
+                return (
+                  <>
+                    <TableCell>{item.vendor.shopName}</TableCell>
+                    <TableCell>{item.vendor.contact}</TableCell>
+                  </>
+                );
+            })()}
+          </TableRow>
+          <TableRow>
+            <TableCell style={{ paddingBottom: 1, paddingTop: 0 }} colSpan={6}>
+              <Box sx={{ margin: 1 }}>
+                <Typography variant="h6" gutterBottom component="div">
+                  Addons
+                </Typography>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        style={{
+                          color: "#4527a0",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Name
+                      </TableCell>
+                      <TableCell
+                        style={{
+                          color: "#4527a0",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Price
+                      </TableCell>
+                      {(() => {
+                        if (choice === "buyer") return <TableCell />;
+                      })()}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {item.addons.map((addon) => (
+                      <TableRow>
+                        <TableCell>{addon.name}</TableCell>
+                        <TableCell>{addon.price}</TableCell>
+                        {(() => {
+                          if (choice === "buyer")
+                            /* TODO: */
+                            return <TableCell>select</TableCell>;
+                        })()}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+              <Box sx={{ margin: 1 }}>
+                <Typography variant="h6" gutterBottom component="div">
+                  Tags
+                </Typography>
+                <Stack direction="row" spacing={1}>
+                  {item.tags.map((tag) => (
+                    <Tag text={tag} />
+                  ))}
+                </Stack>
+              </Box>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell />
+
+            {(() => {
+              if (choice === "buyer") {
+                if (available)
+                  return (
+                    //TODO: Quantity
+                    <TableCell align="center">
+                      <Button
+                        variant="outlined"
+                        style={{ marginInline: "auto" }}
+                      >
+                        Buy
+                      </Button>
+                    </TableCell>
+                  );
+                else
+                  return (
+                    <>
+                      <TableCell />
+
+                      <TableCell align="center">
+                        <Button
+                          color="secondary"
+                          style={{ marginInline: "auto" }}
+                        >
+                          Unavailable
+                        </Button>
+                      </TableCell>
+                    </>
+                  );
+              } else {
+                function deleteItem(name) {
+                  axios
+                    .delete(`/vendor/${name}`, {
+                      headers: {
+                        authorization: localStorage.getItem("authorization"),
+                      },
+                    })
+                    .then((response) => {
+                      // setItems(response.data);
+                      console.log("Success");
+                      let newItems = items.filter((it) => it.name !== name);
+                      setItems(newItems);
+                    })
+                    .catch((error) => {
+                      // navigate("/login");
+                    });
+                }
+                return (
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      style={{ marginInline: "auto" }}
+                      onClick={(event) => deleteItem(item.name)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                );
+              }
+            })()}
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+export default function FoodItems({ choice }) {
+  const [items, setItems] = useState([]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get(`/${choice}`, {
+        headers: { authorization: localStorage.getItem("authorization") },
+      })
+      .then((response) => {
+        setItems(response.data);
+        // console.log(response.data);
+      })
+      .catch((error) => {
+        navigate("/login");
+      });
+  }, []);
+
+  return (
+    <Grid container>
+      {items.map((item) => (
+        <FoodItem
+          key={item.name}
+          item={item}
+          choice={choice}
+          items={items}
+          setItems={setItems}
+        />
+      ))}
+    </Grid>
+  );
+}
+
+// contact: 1234567890

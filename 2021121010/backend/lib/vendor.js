@@ -32,15 +32,12 @@ async function checkOrderLimit(vendor) {
 async function orderCount(vendor) {
   let orders = await getOrders(vendor);
 
-  let placedOrderCount = 0,
+  let placedOrderCount = orders.length,
     rejectedOrderCount = 0,
     completedOrderCount = 0;
 
   for (let i = 0; i < orders.length; i++) {
     switch (orders[i].status) {
-      case "PLACED":
-        placedOrderCount++;
-        break;
       case "COMPLETED":
         completedOrderCount++;
         break;

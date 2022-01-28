@@ -20,6 +20,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useNavigate } from "react-router-dom";
+import FoodItems from "../../templates/FoodItems";
 
 const BuyerDashboard = (props) => {
   const [users, setUsers] = useState([]);
@@ -63,11 +64,6 @@ const BuyerDashboard = (props) => {
 
   return (
     <div>
-      <div>
-        {items.map((item) => (
-          <p>{item.name}</p>
-        ))}
-      </div>
       <Grid container>
         <Grid item xs={12} md={3} lg={3}>
           <List component="nav" aria-label="mailbox folders">
@@ -138,36 +134,7 @@ const BuyerDashboard = (props) => {
             </ListItem>
           </List>
         </Grid>
-        <Grid item xs={12} md={9} lg={9}>
-          <Paper>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell> Sr No.</TableCell>
-                  <TableCell>
-                    {" "}
-                    <Button onClick={sortChange}>
-                      {sortName ? <ArrowDownwardIcon /> : <ArrowUpwardIcon />}
-                    </Button>
-                    Date
-                  </TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user, ind) => (
-                  <TableRow key={ind}>
-                    <TableCell>{ind}</TableCell>
-                    <TableCell>{user.date}</TableCell>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Paper>
-        </Grid>
+        <FoodItems choice={"buyer"} />
       </Grid>
     </div>
   );
