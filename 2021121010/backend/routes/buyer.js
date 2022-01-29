@@ -108,8 +108,6 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
 
   wallet = wallet - cost;
 
-  console.log(JSON.stringify(addons));
-
   const newOrder = new Order({
     placedTime,
     item: req.params.itemId,
@@ -131,5 +129,47 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
 /**
  * My Orders
  */
+
+// Show all orders for this buyer
+router.get("/orders", authenticateToken, checkBuyer, async (req, res) => {
+  const buyer = await Buyer.findById(req.user.user._id);
+  if (!buyer) return res.sendStatus(500);
+  try {
+    let orders = await Order.find({ buyer: buyer._id }).populate({
+      path: "item",
+      model: "Item",
+      populate: {
+        path: "vendor",
+        model: "Vendor",
+      },
+    });
+
+    // console.log(JSON.stringify(orders));
+    return res.status(200).json(orders);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error });
+  }
+});
+
+// Pick up order
+router.put(
+  "/orders/:orderId",
+  authenticateToken,
+  checkBuyer,
+  async (req, res) => {
+    const buyer = await Buyer.findById(req.user.user._id);
+    if (!buyer) return res.sendStatus(500);
+
+    let order = await Order.findOneAndUpdate(
+      { _id: req.params.orderId },
+      { status: "COMPLETED" },
+      { new: true }
+    );
+
+    if (order) return res.status(200).json(order);
+    else return res.sendStatus(500);
+  }
+);
 
 module.exports = router;

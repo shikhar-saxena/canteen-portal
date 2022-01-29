@@ -35,17 +35,21 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
     setChecked(updatedChange);
   };
 
+  const resetCheckedAddons = () => {
+    setChecked(arr);
+  };
+
+  // Finds and returns Date object for given time 'HH:MM'
+  let setDateTime = function (date, time) {
+    let sp = time.split(":");
+    date.setHours(sp[0]);
+    date.setMinutes(sp[1]);
+    return date;
+  };
+
   useEffect(() => {
     if (choice === "buyer") {
       const current = new Date();
-
-      // Finds and returns Date object for given time 'HH:MM'
-      let setDateTime = function (date, time) {
-        let sp = time.split(":");
-        date.setHours(sp[0]);
-        date.setMinutes(sp[1]);
-        return date;
-      };
 
       let currentTime = current.getTime(),
         openTime = setDateTime(
@@ -93,10 +97,12 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
   function addOrder(event, item, checked, quantity, wallet) {
     event.preventDefault();
 
-    console.log(checked);
-
     const currentDate = new Date();
-    const placedTime = currentDate.getHours() + ":" + currentDate.getMinutes();
+    const placedTime = currentDate.toLocaleString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
     axios
       .post(
@@ -110,10 +116,11 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
         setWallet(response.data.wallet);
       })
       .catch((error) => {
-        console.log(error.response.data);
+        // console.log(error.response.data);
       });
 
     setQuantity(0);
+    resetCheckedAddons();
   }
 
   return (

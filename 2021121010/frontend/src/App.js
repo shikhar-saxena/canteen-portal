@@ -57,6 +57,7 @@ function App() {
         <Route path="/buyer" element={<Layout value={2} />}>
           <Route path="/buyer" element={<BuyerDashboard />} />
           <Route path="/buyer/profile" element={<Profile choice={"buyer"} />} />
+          <Route path="/buyer/orders" element={<Orders choice={"buyer"} />} />
         </Route>
         <Route path="/vendor" element={<Layout value={3} />}>
           <Route path="/vendor" element={<AddItem />} />
