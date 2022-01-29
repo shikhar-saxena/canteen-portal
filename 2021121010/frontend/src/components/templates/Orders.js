@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -11,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import { useNavigate } from "react-router-dom";
 import axios from "./axiosConfig";
-import { Stack, Button, Grid, TextField, Checkbox } from "@mui/material";
+import { Stack, Button, Grid } from "@mui/material";
 import Tag from "./Tag";
 
 function VendorOrder({ order }) {
