@@ -76,7 +76,6 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
   const buyer = await Buyer.findById(req.user.user._id);
   if (!buyer) return res.sendStatus(500);
 
-  let cost = req.body.itemPrice;
   const placedTime = req.body.placedTime;
   const quantity = req.body.quantity;
   const checked = req.body.checked;
@@ -89,6 +88,8 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
     return res.status(400).json({ error: "Invalid Quantity" });
   }
 
+  let cost = req.body.itemPrice * quantity;
+
   let addons = [];
 
   checked.forEach((addon) => {
@@ -98,8 +99,6 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
       addons = [...addons, addon];
     }
   });
-
-  cost = cost * quantity;
 
   if (cost > wallet)
     return res
