@@ -10,7 +10,15 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import { useNavigate } from "react-router-dom";
 import axios from "./axiosConfig";
-import { Stack, Button, Grid, TextField, Checkbox } from "@mui/material";
+import {
+  Stack,
+  Button,
+  Grid,
+  TextField,
+  Checkbox,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import Tag from "./Tag";
 
 function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
@@ -26,6 +34,17 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
   const [available, setAvailable] = useState(false);
   const [quantity, setQuantity] = useState(0);
   const [checked, setChecked] = useState(arr);
+
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   // For addon checkboxes
   const handleChange = (event, index) => {
@@ -115,6 +134,10 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
         setWallet(response.data.wallet);
       })
       .catch((error) => {
+        if (error) {
+          setError(error.response.data.error);
+          setOpen(true);
+        }
         // console.log(error.response.data);
       });
 
@@ -131,6 +154,11 @@ function FoodItem({ item, choice, items, setItems, wallet, setWallet }) {
       lg={3}
       sx={{ width: "auto", margin: "1rem" }}
     >
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
+          {error}
+        </Alert>
+      </Snackbar>
       <Table>
         <TableHead>
           <TableRow>

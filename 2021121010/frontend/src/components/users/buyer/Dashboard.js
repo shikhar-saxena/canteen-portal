@@ -7,7 +7,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import { useNavigate } from "react-router-dom";
 import FoodItems from "../../templates/FoodItems";
-import { Stack, Typography } from "@mui/material";
+import { Alert, Snackbar, Stack, Typography } from "@mui/material";
 
 const BuyerDashboard = (props) => {
   const [items, setItems] = useState([]);
@@ -15,6 +15,17 @@ const BuyerDashboard = (props) => {
   const [wallet, setWallet] = useState(0);
 
   const [addedAmount, setAddedAmount] = useState(0);
+
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   useEffect(() => {
     axios
@@ -26,7 +37,7 @@ const BuyerDashboard = (props) => {
       })
       .catch((error) => {
         // navigate("/login");
-        console.log(error);
+        // console.log(error);
       });
   }, [wallet]);
 
@@ -58,6 +69,10 @@ const BuyerDashboard = (props) => {
         setWallet(response.data.wallet);
       })
       .catch((error) => {
+        if (error) {
+          setError(error.response.data.error);
+          setOpen(true);
+        }
         // console.log(error);
       });
 
@@ -66,6 +81,11 @@ const BuyerDashboard = (props) => {
 
   return (
     <div>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
+          {error}
+        </Alert>
+      </Snackbar>
       <Grid container>
         <Grid item xs={12} md={3} lg={3}>
           <List component="nav">
