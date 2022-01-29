@@ -92,12 +92,14 @@ router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
   let addons = [];
 
   checked.forEach((addon) => {
-    console.log(addon);
+    // console.log(addon);
     if (addon.check) {
       cost += addon.addonPrice;
       addons = [...addons, addon];
     }
   });
+
+  cost = cost * quantity;
 
   if (cost > wallet)
     return res
