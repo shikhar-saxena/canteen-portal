@@ -171,4 +171,25 @@ router.put(
   }
 );
 
+// Add rating
+router.put(
+  "/orders/:orderID/:rating",
+
+  authenticateToken,
+  checkBuyer,
+  async (req, res) => {
+    const buyer = await Buyer.findById(req.user.user._id);
+    if (!buyer) return res.sendStatus(500);
+
+    let order = await Order.findOneAndUpdate(
+      { _id: req.params.orderID },
+      { rating: req.params.rating },
+      { new: true }
+    );
+
+    if (order) return res.status(200).json(order);
+    else return res.sendStatus(500);
+  }
+);
+
 module.exports = router;

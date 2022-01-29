@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import { useNavigate } from "react-router-dom";
 import axios from "./axiosConfig";
-import { Stack, Button, Grid } from "@mui/material";
+import { Stack, Button, Grid, Select, MenuItem } from "@mui/material";
 import Tag from "./Tag";
 
 function VendorOrder({ order }) {
@@ -168,6 +168,31 @@ function VendorOrder({ order }) {
 
 function BuyerOrder({ order }) {
   const [orderStatus, setOrderStatus] = useState("PLACED");
+  const [rating, setRating] = useState(0);
+  const [showRating, setShowRating] = useState(true);
+
+  function updateRating(event) {
+    event.preventDefault();
+
+    axios
+      .put(
+        `/buyer/orders/${order._id}/${rating}`,
+        {},
+        {
+          headers: { authorization: localStorage.getItem("authorization") },
+        }
+      )
+      .then((response) => {
+        // console.log(response.data);
+        setRating(response.data.rating);
+        setShowRating(false);
+      })
+      .catch((error) => {
+        setRating(0);
+        // console.log(error);
+        // navigate("/login");
+      });
+  }
 
   function updateOrder(event) {
     event.preventDefault();
@@ -273,7 +298,6 @@ function BuyerOrder({ order }) {
             <TableCell>{order.item.name}</TableCell>
             <TableCell>{order.quantity}</TableCell>
             <TableCell>{order.cost}</TableCell>
-            {/* RATING TODO: */}
           </TableRow>
           {(() => {
             if (order.addons.length > 0)
@@ -313,8 +337,53 @@ function BuyerOrder({ order }) {
               </Typography>
             </TableCell>
             <TableCell />
-            <TableCell />
-            <TableCell />
+            {(() => {
+              if (orderStatus === "COMPLETED") {
+                return (
+                  <TableCell
+                    style={{
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      color: "#4527a0",
+                    }}
+                  >
+                    Rating
+                  </TableCell>
+                );
+              } else return <TableCell></TableCell>;
+            })()}
+            {(() => {
+              if (orderStatus === "COMPLETED") {
+                if (showRating) {
+                  return (
+                    <TableCell
+                      style={{
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        color: "#4527a0",
+                      }}
+                    >
+                      <Select
+                        value={rating}
+                        label="Rating"
+                        onChange={(e) => setRating(e.target.value)}
+                        size="small"
+                      >
+                        <MenuItem value={0}>0</MenuItem>
+                        <MenuItem value={1}>1</MenuItem>
+                        <MenuItem value={2}>2</MenuItem>
+                        <MenuItem value={3}>3</MenuItem>
+                        <MenuItem value={4}>4</MenuItem>
+                        <MenuItem value={5}>5</MenuItem>
+                      </Select>
+                    </TableCell>
+                  );
+                } else {
+                  return <TableCell>{rating}</TableCell>;
+                }
+              } else return <TableCell></TableCell>;
+            })()}
+
             <TableCell>
               {(() => {
                 if (orderStatus === "READY FOR PICKUP") {
@@ -325,6 +394,16 @@ function BuyerOrder({ order }) {
                       onClick={(event) => updateOrder(event)}
                     >
                       Picked up
+                    </Button>
+                  );
+                } else if (orderStatus === "COMPLETED" && showRating) {
+                  return (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={(event) => updateRating(event)}
+                    >
+                      Add Rating
                     </Button>
                   );
                 }
