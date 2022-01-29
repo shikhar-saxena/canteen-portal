@@ -54,19 +54,19 @@ router.post("/", authenticateToken, checkVendor, async (req, res) => {
     });
 
   for (let addon in addons) {
-    //TODO: Check empty for addon (in frontend)
+    // Check empty for addon (in frontend)
 
     let addonPrice = addon.price;
     try {
       addonPrice = parseInt(addonPrice);
     } catch (err) {
       return res.status(400).json({
-        error: "Invalid price in addon element", //TODO: In frontend
+        error: "Invalid price in addon element", // In frontend
       });
     }
   }
 
-  // TODO: check tags (not empty) in frontend
+  // check tags (not empty) in frontend
 
   const newItem = new Item({
     vendor: vendor._id,

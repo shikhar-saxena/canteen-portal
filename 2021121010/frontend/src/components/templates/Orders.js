@@ -306,16 +306,6 @@ function BuyerOrder({ order }) {
             >
               Cost
             </TableCell>
-            {/* TODO: */}
-            {/* <TableCell
-              style={{
-                fontWeight: 700,
-                textTransform: "uppercase",
-                color: "#4527a0",
-              }}
-            >
-              Rating
-            </TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>

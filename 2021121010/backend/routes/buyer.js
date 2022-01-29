@@ -69,8 +69,6 @@ router.put("/", authenticateToken, checkBuyer, async (req, res) => {
   else return res.sendStatus(500);
 });
 
-// TODO: favourite section
-
 // Place Order
 router.post("/:itemId", authenticateToken, checkBuyer, async (req, res) => {
   const buyer = await Buyer.findById(req.user.user._id);
