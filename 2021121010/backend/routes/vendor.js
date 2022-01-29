@@ -5,6 +5,7 @@ const Order = require("../models/Order");
 const authenticateToken = require("../lib/jwtAuth");
 const checkEmpty = require("../lib/checkEmpty");
 const { getOrders, checkOrderLimit, orderCount } = require("../lib/vendor");
+const Buyer = require("../models/Buyer");
 
 /**
  * Authentication wrapper middleware (for Vendor)
@@ -129,7 +130,7 @@ router.put(
     const vendor = await Vendor.findById(req.user.user._id);
     if (!vendor) return res.sendStatus(500);
 
-    let order = await Order.findById(req.params.orderId);
+    let order = await Order.findById(req.params.orderId).populate("buyer");
 
     // Whether Move to next stage (1) or reject
     let orderChoice = req.body.orderChoice;
@@ -140,7 +141,7 @@ router.put(
       case "PLACED":
         count = await checkOrderLimit(vendor);
         if (orderChoice === 1) {
-          if (count < 4) newStatus = "ACCEPTED";
+          if (count < 10) newStatus = "ACCEPTED";
           else
             return res
               .status(400)
@@ -155,14 +156,24 @@ router.put(
         break;
     }
 
+    if (newStatus === "REJECTED") {
+      /* Refund back the money for the buyer */
+      let buyer = await Buyer.findOneAndUpdate(
+        { _id: order.buyer._id },
+        { wallet: parseInt(order.buyer.wallet + order.cost) },
+        { new: true }
+      );
+    }
+
     order = await Order.findOneAndUpdate(
       { _id: req.params.orderId },
       { status: newStatus },
       { new: true }
     );
 
-    if (order) return res.status(200).json(order);
-    else return res.sendStatus(500);
+    if (order) {
+      return res.status(200).json(order);
+    } else return res.sendStatus(500);
   }
 );
 
