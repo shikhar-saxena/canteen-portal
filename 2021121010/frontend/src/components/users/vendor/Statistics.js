@@ -97,12 +97,13 @@ const Statistics = () => {
         >
           top 5 items sold
         </Typography>
-        {orders.map((orderPerItem) => {
-          return (
-            <Typography style={{ padding: "0.5rem", fontSize: 20 }}>
-              {orderPerItem[0].item.name}
-            </Typography>
-          );
+        {orders.map((orderPerItem, index) => {
+          if (index < 5)
+            return (
+              <Typography style={{ padding: "0.5rem", fontSize: 20 }}>
+                {orderPerItem[0].item.name}
+              </Typography>
+            );
         })}
       </Grid>
     </Grid>
