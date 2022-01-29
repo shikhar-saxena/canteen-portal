@@ -10,11 +10,29 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import { useNavigate } from "react-router-dom";
 import axios from "./axiosConfig";
-import { Stack, Button, Grid, Select, MenuItem } from "@mui/material";
+import {
+  Stack,
+  Button,
+  Grid,
+  Select,
+  MenuItem,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import Tag from "./Tag";
 
 function VendorOrder({ order }) {
   const [orderStatus, setOrderStatus] = useState("PLACED");
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   function updateOrder(event, orderChoice) {
     event.preventDefault();
@@ -34,6 +52,10 @@ function VendorOrder({ order }) {
         setOrderStatus(response.data.status);
       })
       .catch((error) => {
+        if (error) {
+          setError(error.response.data.error);
+          setOpen(true);
+        }
         setOrderStatus(initialStatus);
         // console.log(error);
         // navigate("/login");
@@ -53,6 +75,11 @@ function VendorOrder({ order }) {
       elevation={6}
       sx={{ width: "auto", margin: "1rem" }}
     >
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
+          {error}
+        </Alert>
+      </Snackbar>
       <Table>
         <TableHead>
           <TableRow>
