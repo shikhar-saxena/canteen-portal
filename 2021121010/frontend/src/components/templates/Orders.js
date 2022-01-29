@@ -184,7 +184,7 @@ function BuyerOrder({ order }) {
         }
       )
       .then((response) => {
-        console.log(response.data);
+        // console.log(response.data);
         setOrderStatus(response.data.status);
       })
       .catch((error) => {

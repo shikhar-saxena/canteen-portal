@@ -146,7 +146,7 @@ router.get("/orders", authenticateToken, checkBuyer, async (req, res) => {
     // console.log(JSON.stringify(orders));
     return res.status(200).json(orders);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(500).json({ error });
   }
 });

@@ -11,7 +11,9 @@ async function getOrders(vendor) {
     if (items[i])
       orders = [
         ...orders,
-        await Order.find({ item: items[i]._id }).populate("item"),
+        await Order.find({ item: items[i]._id })
+          .populate("item")
+          .populate("buyer"),
       ];
   }
 

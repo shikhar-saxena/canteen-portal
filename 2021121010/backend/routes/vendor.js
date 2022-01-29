@@ -183,10 +183,14 @@ router.put(
 router.get("/statistics", authenticateToken, checkVendor, async (req, res) => {
   const vendor = await Vendor.findById(req.user.user._id);
   if (!vendor) return res.sendStatus(500);
+  let orders = await getOrders(vendor);
   let count = await orderCount(vendor);
+  let stat = {
+    orders,
+    count,
+  };
 
-  return res.status(200).json(count);
-  // TOP 5 items TODO:
+  return res.status(200).json(stat);
 });
 
 module.exports = router;

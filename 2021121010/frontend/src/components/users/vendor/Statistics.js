@@ -15,7 +15,7 @@ const Statistics = () => {
         headers: { authorization: localStorage.getItem("authorization") },
       })
       .then((response) => {
-        setCount(response.data);
+        setCount(response.data.count);
       })
       .catch((error) => {
         navigate("/login");
