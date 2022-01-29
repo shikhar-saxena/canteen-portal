@@ -9,7 +9,10 @@ async function getOrders(vendor) {
 
   for (let i = 0; i < items.length; i++) {
     if (items[i])
-      orders = [...orders, await Order.find({ item: items[i]._id })];
+      orders = [
+        ...orders,
+        await Order.find({ item: items[i]._id }).populate("item"),
+      ];
   }
 
   return orders;
@@ -21,8 +24,14 @@ async function checkOrderLimit(vendor) {
 
   let count = 0;
   for (let i = 0; i < orders.length; i++) {
-    if (orders[i].status === "ACCEPTED" || orders[i].status === "COOKING")
-      count++;
+    const ordersPerItem = orders[i];
+    for (let j = 0; j < ordersPerItem.length; j++) {
+      if (
+        ordersPerItem[j].status === "ACCEPTED" ||
+        ordersPerItem[j].status === "COOKING"
+      )
+        count++;
+    }
   }
 
   return count;
@@ -32,23 +41,28 @@ async function checkOrderLimit(vendor) {
 async function orderCount(vendor) {
   let orders = await getOrders(vendor);
 
-  let placedOrderCount = orders.length,
+  let placedOrderCount = 0,
     rejectedOrderCount = 0,
     completedOrderCount = 0;
 
   for (let i = 0; i < orders.length; i++) {
-    switch (orders[i].status) {
-      case "COMPLETED":
-        completedOrderCount++;
-        break;
-      case "REJECTED":
-        rejectedOrderCount++;
-        break;
+    const ordersPerItem = orders[i];
+
+    placedOrderCount += ordersPerItem.length;
+    for (let j = 0; j < ordersPerItem.length; j++) {
+      switch (ordersPerItem[j].status) {
+        case "COMPLETED":
+          completedOrderCount++;
+          break;
+        case "REJECTED":
+          rejectedOrderCount++;
+          break;
+      }
     }
   }
 
   let pendingOrderCount =
-    orders.length - completedOrderCount - rejectedOrderCount;
+    placedOrderCount - completedOrderCount - rejectedOrderCount;
 
   return { placedOrderCount, pendingOrderCount, completedOrderCount };
 }

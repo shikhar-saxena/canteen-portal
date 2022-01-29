@@ -140,10 +140,10 @@ router.put(
       case "PLACED":
         count = await checkOrderLimit(vendor);
         if (orderChoice === 1) {
-          if (count < 10) newStatus = "ACCEPTED";
+          if (count < 4) newStatus = "ACCEPTED";
           else
             return res
-              .status(200)
+              .status(400)
               .json({ error: "You cannot accept more orders" });
         } else newStatus = "REJECTED";
         break;
