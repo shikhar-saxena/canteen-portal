@@ -356,7 +356,7 @@ export default function Orders({ choice }) {
         // console.log(error.response);
         navigate("/login");
       });
-  }, [choice]);
+  }, [orders, choice]);
 
   // for(let i = 0; i < orders.length; i++) {
   //   let ordersPerItem = orders[i];
