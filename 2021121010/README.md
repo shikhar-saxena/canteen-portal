@@ -1,5 +1,73 @@
 # Canteen Portal
 
+## Dockerizing the WebApp
+
+### Run and Build Instructions 
+
+* Create and start the docker containers using
+
+```
+docker-compose up
+```
+
+and head to `http://localhost` for the webapp (frontend) and `http://localhost/api/` for the webapp (backend).
+
+**Note:** Some protected routes on the backend such as `/vendor` and `/buyer` will show error saying `please login to access this page` when directly accessed from browser using the `/api` URI (because of the JWT authorization header).
+
+* For build, use
+
+```
+docker-compose build
+```
+
+### Files added 
+
+#### ./backend/.dockerignore and ./frontend/.dockerignore
+
+`.dockerignore` files to ignore `node_modules/` folder and `build/` folder (in `frontend/`) while running the `COPY` instruction in the Dockerfile.
+
+#### Dockerfile (frontend)
+
+Using node (version 16) alpine base image, we first install the node modules (clean install). Then we build the frontend (for production) using `npm run build`. Now using `serve` npm package, we host the frontend on a static server.
+
+#### Dockerfile (backend)
+
+Using node (version 16) alpine base image, we first install the node modules (clean install). Then we host the backend using `npm start`
+
+#### nginx folder
+
+Our nginx folder contains two files, `local.conf` and a `Dockerfile`.
+
+**local.conf**
+
+Nginx Configuration for routing "/" requests to frontend and "/api" requests to backend.
+
+**Dockerfile**
+
+Docker instruction to create an nginx container that uses `local.conf` configuration. 
+
+#### docker-compose.yml
+
+Contains configuration to start all four containers (frontend, database/mongo, backend and nginx) and connect them using `networks`.
+
+**Note:** We have used `volumes` in our database for persistent storage.
+
+### Changes made to assignment-1 code
+
+#### Production Changes
+
+1. **index.js**
+
+    The connection string for `mongoose` is changed from localhost i.e., `127.0.0.1` to `mongo` (service name for the database in the docker-compose.yml file).
+
+2. **axiosConfig.js**
+
+    The baseURL for axios has been changed from `localhost:4000` to just `/api` (nginx configuration let's us redirect all backend calls on `/api`).
+
+#### Bug Fix
+
+Some changes were made in order ratings on the buyer's side. The changes include removing `default` and `required` in the `rating` field in `Order` model. And adding some more conditions in the `Orders.js` react component. 
+
 ## Running the WebApp
 
 * Run Mongo daemon:

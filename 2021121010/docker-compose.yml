@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+
+  # mongodb container
+  mongo:
+    image: mongo
+    restart: always
+
+    # volume for persistent storage
+    volumes: 
+      - mongodata:/data/db
+    networks:
+      - mern_food_portal
+  
+  # backend container
+  backend:
+    build: ./backend/
+    restart: always
+    depends_on:
+      - mongo
+    networks:
+      - mern_food_portal
+  
+  # frontend container
+  frontend:
+    restart: always
+    build: ./frontend/
+    depends_on:
+      - backend
+    networks:
+      - mern_food_portal
+  
+  # nginx container
+  # runs the Dockerfile in the nginx folder
+  nginx:
+    build: ./nginx/
+    image: nginx
+
+    # expose port of nginx container (run at port 80 on host machine)
+    ports:
+      - 80:80
+    restart: always
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - mern_food_portal
+
+# network for the containers 
+networks:
+  mern_food_portal:
+    driver: bridge
+
+# volume (for database)
+volumes:
+  mongodata:

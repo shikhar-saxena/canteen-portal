@@ -248,7 +248,10 @@ function BuyerOrder({ order }) {
   useEffect(() => {
     // if (order.addons && order.addons.length !== 0) setCheckAddons(true);
     // else setCheckAddons(false);
-
+    if (order.rating || order.rating === 0) {
+      setRating(order.rating);
+      setShowRating(false);
+    }
     setOrderStatus(order.status);
   }, [order]);
 
